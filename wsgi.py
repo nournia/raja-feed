@@ -4,16 +4,16 @@
 import sys, os, json, time
 
 def mongodb_uri():
-	 local = os.environ.get("MONGODB", None)
-	 if local:
-		  return local
-	 services = json.loads(os.environ.get("VCAP_SERVICES", "{}"))
-	 if services:
+	local = os.environ.get("MONGODB", None)
+	if local:
+		return local
+	services = json.loads(os.environ.get("VCAP_SERVICES", "{}"))
+	if services:
 		creds = services['mongodb-1.8'][0]['credentials']
 		uri = "mongodb://%s:%s@%s:%d/%s" % (creds['username'], creds['password'], creds['hostname'], creds['port'], creds['db'])
 		print >> sys.stderr, uri
 		return uri
-	 else:
+	else:
 		raise Exception, "No services configured"
 
 # my app
@@ -38,7 +38,7 @@ def getRajaLastNews():
 	posts.append({'title': title.text, 'subtitle': '', 'description': desc.get('title').strip(), 'link': domain + title.get('href'), 'image': domain + img.get('src'), 'published': datetime.datetime.now()})
 
 	# last posts
-	for i in [1, 4, 7]:
+	for i in [1, 4, 7, 10]:
 		title = tree.xpath('//table[@id="NewsWithImage1"]/tr['+ str(i) +']//div[@class="Titr2"]/a')[0]
 		subtitle = tree.xpath('//table[@id="NewsWithImage1"]/tr['+ str(i) +']//div[@class="Titr1"]/a')[0]
 		img = tree.xpath('//table[@id="NewsWithImage1"]/tr['+ str(i+1) +']//img')[0]
