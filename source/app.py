@@ -1,29 +1,18 @@
-#!/usr/bin/env python
 # coding=utf8
 
-import sys, os, json, time
-
-def mongodb_uri():
-	local = os.environ.get("MONGODB", None)
-	if local:
-		return local
-	services = json.loads(os.environ.get("VCAP_SERVICES", "{}"))
-	if services:
-		creds = services['mongodb-1.8'][0]['credentials']
-		uri = "mongodb://%s:%s@%s:%d/%s" % (creds['username'], creds['password'], creds['hostname'], creds['port'], creds['db'])
-		print >> sys.stderr, uri
-		return uri
-	else:
-		raise Exception, "No services configured"
-
-# my app
-from flask import Flask, Request, Response
+import json, datetime
+from flask import Flask, Request
 from werkzeug.contrib.atom import AtomFeed
-import urllib2, datetime
 from lxml import etree
 from pymongo import Connection
 
-application = app = Flask('wsgi')
+app = Flask('wsgi')
+
+
+def mongodb_uri():
+	environment = json.load(open('/home/dotcloud/environment.json'))
+	return environment['DOTCLOUD_DATA_MONGODB_URL']
+
 
 def getRajaLastNews():
 	domain = 'http://www.rajanews.com/'
@@ -47,6 +36,7 @@ def getRajaLastNews():
 
 	return posts
 
+
 @app.route('/main.atom')
 def main_feed():
 	posts = Connection(mongodb_uri()).db.posts
@@ -59,6 +49,7 @@ def main_feed():
 
 	return feed.get_response()
 
+
 @app.route('/update')
 def check_raja():
 	posts = Connection(mongodb_uri()).db.posts
@@ -70,8 +61,8 @@ def check_raja():
 			inserted = True
 
 	if inserted:
-		return 'new post'
-	return 'unchanged'
+		return str(datetime.datetime.now()) + ' new post\n'
+	return str(datetime.datetime.now()) + ' unchanged\n'
 
 if __name__ == '__main__':
-	 app.run()
+	app.run()
