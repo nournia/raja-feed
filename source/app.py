@@ -27,7 +27,7 @@ def getRajaLastNews():
 	posts.append({'title': title.text, 'subtitle': '', 'description': desc.get('title').strip(), 'link': domain + title.get('href'), 'image': domain + img.get('src'), 'published': datetime.datetime.now()})
 
 	# last n posts
-	n = 5
+	n = 10
 	for i in range(1, 3*n, 3):
 		title = tree.xpath('//table[@id="NewsWithImage1"]/tr['+ str(i) +']//div[@class="Titr2"]/a')[0]
 		subtitle = tree.xpath('//table[@id="NewsWithImage1"]/tr['+ str(i) +']//div[@class="Titr1"]/a')[0]
@@ -38,17 +38,25 @@ def getRajaLastNews():
 	return posts
 
 
-@app.route('/main.atom')
-def main_feed():
-	posts = Connection(mongodb_uri()).db.posts
-
+def getFeed(posts):
 	feed = AtomFeed(u'خبرخوان رجا نیوز', feed_url=Request.url, url=Request.url_root)
 
-	for post in posts.find().sort('published', -1).limit(20):
+	for post in posts:
 		content = '<img style="float: right; margin-left: 15px; width: 80px" src="%s"><p style="color: #777">%s</p><p>%s</p>' % (post['image'], post['subtitle'] if post['subtitle'] else '', post['description'])
 		feed.add(post['title'], unicode(content), content_type='html', url=post['link'], updated=post['published'], published=post['published'])
 
 	return feed.get_response()
+
+
+@app.route('/current.atom')
+def current_feed():
+	return getFeed(getRajaLastNews())
+
+
+@app.route('/')
+def main_feed():
+	posts = Connection(mongodb_uri()).db.posts
+	return getFeed(posts.find().sort('published', -1).limit(20))
 
 
 @app.route('/update')
