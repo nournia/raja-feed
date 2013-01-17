@@ -2,7 +2,7 @@
 # coding=utf8
 
 import datetime
-from flask import Flask, Request
+from flask import Flask, request
 from werkzeug.contrib.atom import AtomFeed
 from lxml import etree
 
@@ -33,7 +33,7 @@ def getRajaLastNews(n=10):
 
 
 def getFeed(posts):
-	feed = AtomFeed(u'خبرخوان رجا نیوز', feed_url=Request.url, url=Request.url_root)
+	feed = AtomFeed(u'خبرخوان رجا نیوز', feed_url=request.url, url=request.url_root, icon='http://www.rajanews.com/favicon.ico', author={'name': u'سُبحه', 'uri': 'www.sobhe.ir'})
 
 	for post in posts:
 		content = '<img style="float: right; margin-left: 15px; width: 80px" src="%s"><p style="color: #777">%s</p><p>%s</p>' % (post['image'], post['subtitle'] if post['subtitle'] else '', post['description'])
