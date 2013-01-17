@@ -1,7 +1,0 @@
-www:
-    type: python
-    approot: source
-
-data:
-    type: mongodb
-

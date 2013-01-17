@@ -1,20 +1,15 @@
+#!/usr/bin/env python
 # coding=utf8
 
-import json, datetime
+import datetime
 from flask import Flask, Request
 from werkzeug.contrib.atom import AtomFeed
 from lxml import etree
-from pymongo import Connection
 
-app = Flask('wsgi')
-
-
-def mongodb_uri():
-	environment = json.load(open('/home/dotcloud/environment.json'))
-	return environment['DOTCLOUD_DATA_MONGODB_URL']
+application = app = Flask('wsgi')
 
 
-def getRajaLastNews():
+def getRajaLastNews(n=10):
 	domain = 'http://www.rajanews.com/'
 	tree = etree.parse(domain, etree.HTMLParser())
 
@@ -27,7 +22,6 @@ def getRajaLastNews():
 	posts.append({'title': title.text, 'subtitle': '', 'description': desc.get('title').strip(), 'link': domain + title.get('href'), 'image': domain + img.get('src'), 'published': datetime.datetime.now()})
 
 	# last n posts
-	n = 10
 	for i in range(1, 3*n, 3):
 		title = tree.xpath('//table[@id="NewsWithImage1"]/tr['+ str(i) +']//div[@class="Titr2"]/a')[0]
 		subtitle = tree.xpath('//table[@id="NewsWithImage1"]/tr['+ str(i) +']//div[@class="Titr1"]/a')[0]
@@ -48,30 +42,10 @@ def getFeed(posts):
 	return feed.get_response()
 
 
-@app.route('/current.atom')
-def current_feed():
-	return getFeed(getRajaLastNews())
-
-
 @app.route('/')
 def main_feed():
-	posts = Connection(mongodb_uri()).db.posts
-	return getFeed(posts.find().sort('published', -1).limit(20))
+	return getFeed(getRajaLastNews())
 
-
-@app.route('/update')
-def check_raja():
-	posts = Connection(mongodb_uri()).db.posts
-
-	inserted = False
-	for post in getRajaLastNews():
-		if len(list(posts.find({'link': post['link']}))) == 0:
-			posts.insert(post, safe=True)
-			inserted = True
-
-	if inserted:
-		return str(datetime.datetime.now()) + ' new post\n'
-	return str(datetime.datetime.now()) + ' unchanged\n'
 
 if __name__ == '__main__':
 	app.run()
