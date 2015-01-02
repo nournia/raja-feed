@@ -1,4 +1,4 @@
 
-# Raja Feed Generator
+# Rajanews Feed
 
-Feed generator for [Rajanews](http://rajanews.com/), as they do not provide feed for their main page .
+Feed generator for [Rajanews](http://rajanews.com/) main page .
