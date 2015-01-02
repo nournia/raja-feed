@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding=utf8
 
 import datetime
@@ -6,7 +5,7 @@ from flask import Flask, request
 from werkzeug.contrib.atom import AtomFeed
 from lxml import etree
 
-application = app = Flask('wsgi')
+app = Flask(__name__)
 
 
 def getRajaLastNews(n=10):
