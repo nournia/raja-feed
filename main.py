@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 
 def getRajaLastNews():
-	domain = 'http://www.rajanews.com/'
+	domain = 'http://www.rajanews.com'
 	raja = pq(domain)
 
 	item = raja('.slider1 .item')
